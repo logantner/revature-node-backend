@@ -1,5 +1,5 @@
 import { Router, Request, Response, request } from "express";
-import { Pool, Client } from "pg";
+import { pool } from "../dbConnection"
 
 const authRouter = Router();
 
@@ -19,32 +19,20 @@ authRouter.post("/login", async (req, res) => {
 });
 
 async function canBeAuthenticated(req: Request): Promise<boolean> {
-    const pool = new Pool({
-        database: "postgres",
-        host: "java-react-200526.cdd3r37v89rz.us-east-2.rds.amazonaws.com",
-        user: "postgres",
-        password: "Boomer744!",
-        port: 5432
-    });
-
-    pool.connect(err => {
-        if (err) { console.error('connection error:', err.stack) }
-    });
-
-    const res = await pool.query(
-        `SELECT username, pass from nutrition_auth where username='${req.body.username}';`
-    );
-
-    let isValid: boolean;
-    if (res.rows.length > 0 && res.rows[0].pass === req.body.password) {
-        isValid = true;
-    } else {
-        isValid = false;
-    }
-
-    pool.end();
-    return isValid;
-    
+    let client;
+    try {
+        client = await pool.connect();
+        const res = await pool.query(
+            "SELECT id, password from auth where id = $1",
+            [req.body.username]
+        );
+        return res.rows.length > 0 && res.rows[0].password === req.body.password ? true : false;
+    } catch (err) {
+        console.log(err);
+        return false;
+    } finally {
+        client && client.release()
+    }    
 }
 
 authRouter.get("/status", (req, res) => {
