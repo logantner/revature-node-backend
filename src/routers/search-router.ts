@@ -1,5 +1,5 @@
 import { Router, Request, Response, request } from "express";
-import { pool, quickQuery } from "../dbConnection"
+import { pool, quickQuery } from "../dbSupport/dbConnection"
 import {searchNames, dbCategories} from '../dbSupport/searchSupport'
 
 const searchRouter = Router();

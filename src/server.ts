@@ -2,6 +2,7 @@ import express, { Application, Request, Response } from "express";
 import session from "express-session";
 import authRouter from "./routers/auth-router";
 import searchRouter from "./routers/search-router";
+import logRouter from "./routers/foodlog-router";
 
 
 const app: Application = express();
@@ -18,6 +19,7 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use("/auth", authRouter);
 app.use("/search", searchRouter);
+app.use("/log", logRouter);
 
 app.listen(port, () => {
     console.log("Server started")

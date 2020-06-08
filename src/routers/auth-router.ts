@@ -1,5 +1,5 @@
 import { Router, Request, Response, request } from "express";
-import { pool, quickQuery } from "../dbConnection"
+import { pool, quickQuery } from "../dbSupport/dbConnection"
 
 const authRouter = Router();
 
@@ -8,7 +8,10 @@ const authRouter = Router();
 /////////////////////
 authRouter.post("/login", async (req, res) => {
     if(await canBeAuthenticated(req)) {
-        if (req.session) { req.session.user = "admin"; } 
+        if (req.session) { 
+            req.session.user = req.body.username; 
+            req.session.password = req.body.password; 
+        } 
         else { res.status(500); }
     } 
     else { res.status(401); }
