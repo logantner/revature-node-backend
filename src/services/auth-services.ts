@@ -17,14 +17,14 @@ async function verifyCredentials(cookie: Express.Session | undefined, res: Respo
 
     if (authQueryResult === undefined) {
         res.status(500);
-        res.json({'msg': 'Authorizationn database connection was unsuccessful'});
-            return -1;
+        res.send({'msg': 'Authorizationn database connection was unsuccessful'});
+        return -1;
     }
 
     let rows: any[] = authQueryResult.rows;
     if (rows.length === 0 || rows[0].password !== cookie.password) {
         res.status(401);
-        res.json({'msg': 'Session data could not be verified. Please try logging in again.'});
+        res.send({'msg': 'Session data could not be verified. Please try logging in again.'});
         return -1;
     }
 

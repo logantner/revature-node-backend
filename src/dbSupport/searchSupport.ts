@@ -21,4 +21,13 @@ const dbCategories = [
     'produce'
 ]
 
-export {searchNames, dbCategories};
+const dbUnits = [
+    'g',
+    'cup',
+    'tbsp',
+    'mL',
+    'fl_oz',
+    'oz'
+]
+
+export {searchNames, dbCategories, dbUnits};
