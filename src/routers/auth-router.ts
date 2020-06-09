@@ -1,5 +1,7 @@
 import { Router, Request, Response, request } from "express";
 import { pool, quickQuery } from "../dbSupport/dbConnection"
+import { verifyCredentials } from "../services/auth-services"
+import { QueryResult } from "pg";
 
 const authRouter = Router();
 
@@ -72,6 +74,69 @@ authRouter.get("/logout", (req, res) => {
     }
     res.end();
 });
+
+/////////////////
+// delete user //
+/////////////////
+authRouter.delete("/", async (req, res) => {
+    const userType: number = await verifyCredentials(req.session, res);
+
+    if (await isValidUser(req, res, userType)) {
+        const q: QueryResult<any> | undefined = await quickQuery(pool.query(
+            "delete from auth where id = $1",
+            [req.body.user]
+        ))
+
+        if (q === undefined) {
+            res.status(500);
+            res.send({'msg': 'Request is valid but connection to database failed'});
+            return;
+        }
+    }
+
+    res.status(204);
+    res.send({'msg': 'User and associated logs have been deleted'});
+})
+
+async function isValidUser(req:Request, res:Response, userType: number) : Promise<boolean> {
+    if (userType !== 1) {
+        if (userType === 2){
+            res.status(403);
+            res.send({'msg': 'Only administrators may delete user accounts'});
+        }
+        return false;
+    }
+
+    if (req.body.user === undefined) {
+        res.status(400);
+        res.send({'msg': 'Body is missing user field'})
+        return false;
+    }
+
+    const q = await quickQuery(pool.query(
+        "select id, role_id from auth", []
+    ));
+
+    if (q === undefined) {
+        res.status(500);
+        res.send({'msg': 'Connection to authorization database was unsuccessful'});
+        return false;
+    }
+
+    const matchingRecord = q.rows.filter(row => row.id === req.body.user);
+    if (matchingRecord.length === 0) {
+        res.status(404);
+        res.send({'msg': 'User cannot be found'})
+        return false;
+    } 
+    if (matchingRecord[0].role_id === 1) {
+        res.status(403);
+        res.send({'msg': 'Administrators cannot be deleted at this level'})
+        return false;
+    }
+
+    return true;
+}
 
 async function canBeAuthenticated(req: Request): Promise<boolean> {
     if (!(req.body.username && req.body.password)) {

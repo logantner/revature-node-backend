@@ -17,7 +17,7 @@ async function verifyCredentials(cookie: Express.Session | undefined, res: Respo
 
     if (authQueryResult === undefined) {
         res.status(500);
-        res.send({'msg': 'Authorizationn database connection was unsuccessful'});
+        res.send({'msg': 'Connection to authorization database was unsuccessful'});
         return -1;
     }
 
