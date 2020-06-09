@@ -2,6 +2,7 @@ import { Router, Request, Response, request } from "express";
 import { pool, quickQuery } from "../dbSupport/dbConnection"
 import { verifyCredentials } from "../services/auth-services"
 import { QueryResult } from "pg";
+import { verifyCookieCredentials } from "../middleware/auth-middleware";
 
 const authRouter = Router();
 
@@ -78,24 +79,25 @@ authRouter.get("/logout", (req, res) => {
 /////////////////
 // delete user //
 /////////////////
-authRouter.delete("/", async (req, res) => {
-    const userType: number = await verifyCredentials(req.session, res);
+authRouter.delete("/", verifyCookieCredentials, async (req:Request, res:Response) => {
+    const userType: number = req.userType || -1;
 
     if (await isValidUser(req, res, userType)) {
         const q: QueryResult<any> | undefined = await quickQuery(pool.query(
             "delete from auth where id = $1",
             [req.body.user]
-        ))
+        ));
 
         if (q === undefined) {
             res.status(500);
             res.send({'msg': 'Request is valid but connection to database failed'});
             return;
         }
+
+        res.sendStatus(204);
     }
 
-    res.status(204);
-    res.send({'msg': 'User and associated logs have been deleted'});
+    res.end();
 })
 
 async function isValidUser(req:Request, res:Response, userType: number) : Promise<boolean> {

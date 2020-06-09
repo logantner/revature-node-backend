@@ -3,7 +3,15 @@ import session from "express-session";
 import authRouter from "./routers/auth-router";
 import searchRouter from "./routers/search-router";
 import logRouter from "./routers/foodlog-router";
+import {verifyCookieCredentials} from "./middleware/auth-middleware";
 
+declare global {
+    namespace Express {
+        interface Request {
+            userType?: number
+        }
+    }
+}
 
 const app: Application = express();
 const port = process.env.PORT || 8082; // If provided by the environment, grab it
@@ -12,13 +20,11 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(session({ secret: "mySecret" })); // Encrypt/decrypt cookie data
 
-app.get("/", (req: Request, res: Response) => {
-    console.log("request made to server");
-    res.send("Hello World");
-})
-
 app.use("/auth", authRouter);
 app.use("/search", searchRouter);
+
+app.use(verifyCookieCredentials);
+
 app.use("/log", logRouter);
 
 app.listen(port, () => {

@@ -10,11 +10,6 @@ import { dbUnits } from "../dbSupport/searchSupport";
 const logRouter = Router();
 
 logRouter.get("/", async (req, res) => {
-    const userType: number = await verifyCredentials(req.session, res);
-
-    if (userType === -1) {
-        return;
-    }
     let userName: string = req.session ? req.session.user : "";
 
     const result: QueryResult<any> | undefined = await quickQuery(pool.query(
@@ -35,10 +30,7 @@ logRouter.get("/", async (req, res) => {
 });
 
 logRouter.post("/", async (req, res) => {
-    const userType: number = await verifyCredentials(req.session, res);
-
     if (
-        userType !== -1 &&
         allFieldsIncluded(req, res) &&
         isValidDate(req, res) &&
         (await isValidFoodID(req, res)) &&
