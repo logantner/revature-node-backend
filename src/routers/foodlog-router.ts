@@ -1,6 +1,5 @@
 import { Router, Request, Response, request, response } from "express";
 import { pool, quickQuery } from "../dbSupport/dbConnection"
-import { verifyCredentials } from "../services/auth-services"
 import "express-session"
 import { QueryResult } from "pg";
 import moment from 'moment';

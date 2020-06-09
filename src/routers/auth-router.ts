@@ -1,8 +1,7 @@
 import { Router, Request, Response, request } from "express";
 import { pool, quickQuery } from "../dbSupport/dbConnection"
-import { verifyCredentials } from "../services/auth-services"
 import { QueryResult } from "pg";
-import { verifyCookieCredentials } from "../middleware/auth-middleware";
+import { verifyCookieCredentials, verifyAdmin } from "../middleware/auth-middleware";
 
 const authRouter = Router();
 
@@ -55,7 +54,6 @@ authRouter.post("/register", async (req, res) => {
     res.end();
 });
 
-
 ////////////////////////
 // check login status //
 ////////////////////////
@@ -64,7 +62,6 @@ authRouter.get("/status", (req, res) => {
     console.log(req.session);
     res.end();
 });
-
 
 /////////////////
 // logout user //
@@ -79,10 +76,8 @@ authRouter.get("/logout", (req, res) => {
 /////////////////
 // delete user //
 /////////////////
-authRouter.delete("/", verifyCookieCredentials, async (req:Request, res:Response) => {
-    const userType: number = req.userType || -1;
-
-    if (await isValidUser(req, res, userType)) {
+authRouter.delete("/", [verifyCookieCredentials, verifyAdmin], async (req:Request, res:Response) => {
+    if (await isValidUser(req, res)) {
         const q: QueryResult<any> | undefined = await quickQuery(pool.query(
             "delete from auth where id = $1",
             [req.body.user]
@@ -100,14 +95,52 @@ authRouter.delete("/", verifyCookieCredentials, async (req:Request, res:Response
     res.end();
 })
 
-async function isValidUser(req:Request, res:Response, userType: number) : Promise<boolean> {
-    if (userType !== 1) {
-        if (userType === 2){
-            res.status(403);
-            res.send({'msg': 'Only administrators may delete user accounts'});
-        }
+///////////////////////////
+// promote user to admin //
+///////////////////////////
+authRouter.patch("/promote/:username", [verifyCookieCredentials, verifyAdmin], async (req:Request, res:Response) => {
+    const userName: string = req.params.username;
+    const userQuery = await quickQuery(pool.query(
+        "select * from auth where id = $1",
+        [userName]
+    ))
+
+    if (userQuery === undefined) {
+        res.status(500);
+        res.send({'msg': 'Connection to authorization database was unsuccessful'});
+        return;
+    }
+
+    if (userQuery.rows.length === 0) {
+        res.status(404);
+        res.send({'msg': 'User cannot be found'})
         return false;
     }
+
+    const role: number = userQuery.rows[0].role_id;
+    if (role === 1) {
+        res.status(409);
+        res.send({'msg': 'Admin cannot be promoted any further'})
+        return false;
+    }
+
+    const alterQuery = await quickQuery(pool.query(
+        "update auth set role_id = 1 where id = $1",
+        [userName]
+    ));
+
+    if (alterQuery === undefined) {
+        res.status(500);
+        res.send({'msg': 'Connection to authorization database was unsuccessful'});
+        return;
+    }
+
+    res.status(200)
+    res.send({'msg': 'User has been promoted to admin'});
+})
+
+
+async function isValidUser(req:Request, res:Response) : Promise<boolean> {
 
     if (req.body.user === undefined) {
         res.status(400);

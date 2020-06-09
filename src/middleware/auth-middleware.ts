@@ -34,4 +34,16 @@ async function verifyCookieCredentials(req: Request, res: Response, next:Functio
     next();
 }
 
-export {verifyCookieCredentials}
+async function verifyAdmin(req: Request, res: Response, next:Function ) {
+    const userType: number = req.userType || -1;
+
+    if (userType !== 1) {
+        res.status(403);
+        res.send({'msg': 'Only administrators may perform this request'});
+        return;
+    }
+
+    next();
+}
+
+export {verifyCookieCredentials, verifyAdmin}
