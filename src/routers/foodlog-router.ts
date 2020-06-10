@@ -8,6 +8,9 @@ import { dbUnits } from "../dbSupport/searchSupport";
 
 const logRouter = Router();
 
+///////////////////////////
+// Get all user log data //
+///////////////////////////
 logRouter.get("/", async (req, res) => {
     let userName: string = req.session ? req.session.user : "";
 
@@ -25,6 +28,9 @@ logRouter.get("/", async (req, res) => {
     
 });
 
+///////////////////////
+// Add new log entry //
+///////////////////////
 logRouter.put("/", async (req, res) => {
     if (
         allFieldsIncluded(req, res) &&
@@ -45,11 +51,12 @@ logRouter.put("/", async (req, res) => {
             res.send({'msg': 'New log has been archived'});
         }
     }
-    
-
     res.send();
 });
 
+///////////////////////
+// Support functions //
+///////////////////////
 function allFieldsIncluded(req: Request, res: Response): boolean {
     if( req.body.date === undefined || 
         req.body.food_id === undefined || 

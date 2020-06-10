@@ -13,7 +13,7 @@ authRouter.post("/login", async (req, res) => {
             req.session.user = req.body.username; 
             req.session.password = req.body.password; 
         } 
-        else { res.status(500); }
+        // else { res.status(500); }
     } 
     else { res.status(401); }
     res.end();
@@ -100,23 +100,24 @@ authRouter.post("/promote", [verifyCookieCredentials, verifyIsAdmin, verifyUserI
 
 async function canBeAuthenticated(req: Request, res:Response): Promise<boolean> {
     if (!(req.body.username && req.body.password)) {
+        res.status(400);
+        res.send({'msg': 'Must include username and password'});
         return false;
     }
-
-    // const q = await pool.query(
-    //     "SELECT id, password from auth where id = $1",
-    //     [req.body.username]
-    // );
 
     const q = await singleQuery(res, 
         "SELECT id, password from auth where id = $1",
         [req.body.username]
     );
-    // console.log(q);
-    return true;
-    // if (q === undefined) {return false;}
 
-    // return q.rows.length > 0 && q.rows[0].password === req.body.password ? true : false;  
+    if (q === undefined) {return false;}
+
+    if (q.rows.length === 0 || q.rows[0].password !== req.body.password) {
+        res.status(401);
+        res.send({'msg': 'Username or password is incorrect'});
+        return false;
+    }
+    return true;
 }
 
 
