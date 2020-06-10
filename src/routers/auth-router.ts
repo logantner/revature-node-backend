@@ -8,7 +8,7 @@ const authRouter = Router();
 // logging in user //
 /////////////////////
 authRouter.post("/login", async (req, res) => {
-    if(await canBeAuthenticated(req)) {
+    if(await canBeAuthenticated(req, res)) {
         if (req.session) { 
             req.session.user = req.body.username; 
             req.session.password = req.body.password; 
@@ -85,7 +85,7 @@ authRouter.delete("/delete", [verifyCookieCredentials, verifyIsAdmin, verifyUser
 ///////////////////////////
 // promote user to admin //
 ///////////////////////////
-authRouter.patch("/promote", [verifyCookieCredentials, verifyIsAdmin, verifyUserInDB], async (req:Request, res:Response) => {
+authRouter.post("/promote", [verifyCookieCredentials, verifyIsAdmin, verifyUserInDB], async (req:Request, res:Response) => {
     const alterQuery = await singleQuery(res,
         "update auth set role_id = 1 where id = $1",
         [req.body.user]
@@ -98,18 +98,26 @@ authRouter.patch("/promote", [verifyCookieCredentials, verifyIsAdmin, verifyUser
 })
 
 
-async function canBeAuthenticated(req: Request): Promise<boolean> {
+async function canBeAuthenticated(req: Request, res:Response): Promise<boolean> {
     if (!(req.body.username && req.body.password)) {
         return false;
     }
 
-    const res = await pool.query(
+    // const q = await pool.query(
+    //     "SELECT id, password from auth where id = $1",
+    //     [req.body.username]
+    // );
+
+    const q = await singleQuery(res, 
         "SELECT id, password from auth where id = $1",
         [req.body.username]
     );
+    // console.log(q);
+    return true;
+    // if (q === undefined) {return false;}
 
-    return res.rows.length > 0 && res.rows[0].password === req.body.password ? true : false;  
+    // return q.rows.length > 0 && q.rows[0].password === req.body.password ? true : false;  
 }
 
 
-export default authRouter;
+export {authRouter, canBeAuthenticated};

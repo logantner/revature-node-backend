@@ -1,6 +1,6 @@
 import express, { Application, Request, Response } from "express";
 import session from "express-session";
-import authRouter from "./routers/auth-router";
+import {authRouter} from "./routers/auth-router";
 import searchRouter from "./routers/search-router";
 import logRouter from "./routers/foodlog-router";
 import {verifyCookieCredentials} from "./middleware/auth-middleware";
@@ -15,6 +15,8 @@ declare global {
 
 const app: Application = express();
 const port = process.env.PORT || 8082;
+
+console.log(process.env);
 
 app.use(express.json());
 app.use(express.urlencoded());
