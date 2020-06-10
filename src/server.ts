@@ -14,11 +14,11 @@ declare global {
 }
 
 const app: Application = express();
-const port = process.env.PORT || 8082; // If provided by the environment, grab it
+const port = process.env.PORT || 8082;
 
 app.use(express.json());
 app.use(express.urlencoded());
-app.use(session({ secret: "mySecret" })); // Encrypt/decrypt cookie data
+app.use(session({ secret: "mySecret" }));
 
 app.use("/auth", authRouter);
 app.use("/search", searchRouter);

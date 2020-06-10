@@ -44,7 +44,6 @@ async function verifyIsAdmin(req: Request, res: Response, next:Function ) {
 async function verifyUserInDB(req: Request, res: Response, next:Function ) {
     const userName: string = req.body.user;
 
-    console.log(`select * from auth where id = ${userName}`)
     const userQuery = await singleQuery(res,
         "select * from auth where id = $1",
         [userName]

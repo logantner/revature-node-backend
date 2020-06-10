@@ -17,7 +17,7 @@ async function singleQuery(res: Response, qStr: string, qArgs: any[]): Promise<Q
     } catch (err) {
         console.log(err);
         res.status(500);
-        res.send({'msg': 'Request is valid but connection to database failed'});
+        res.send({'msg': 'Connection to database failed'});
         return;
     } finally {
         client && client.release();
