@@ -1,5 +1,5 @@
-import { Pool } from "pg";
-import { QueryResult } from "pg";
+import { Response } from "express";
+import { Pool, QueryResult } from "pg";
 
 const pool = new Pool({
     database: "nutrition",
@@ -9,17 +9,19 @@ const pool = new Pool({
     port: 5432
 });
 
-async function quickQuery(myQuery: Promise<QueryResult<any>>): Promise<QueryResult<any> | undefined> {
+async function singleQuery(res: Response, qStr: string, qArgs: any[]): Promise<QueryResult<any> | undefined> {
     let client;
     try {
         client = await pool.connect();
-        return await myQuery;
+        return await pool.query(qStr, qArgs);
     } catch (err) {
         console.log(err);
+        res.status(500);
+        res.send({'msg': 'Request is valid but connection to database failed'});
         return;
     } finally {
         client && client.release();
     }
 }
 
-export {pool, quickQuery};
+export {pool, singleQuery};

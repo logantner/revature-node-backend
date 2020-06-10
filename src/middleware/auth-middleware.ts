@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import "express-session"
 import { QueryResult } from "pg";
-import { pool, quickQuery } from "../dbSupport/dbConnection"
+import { singleQuery } from "../dbSupport/dbConnection"
 // import { runInNewContext } from "vm";
 
 async function verifyCookieCredentials(req: Request, res: Response, next:Function ) {
@@ -12,18 +12,13 @@ async function verifyCookieCredentials(req: Request, res: Response, next:Functio
         return;
     }
 
-    let authQueryResult: QueryResult<any> | undefined = await quickQuery(pool.query(
+    const authQuery: QueryResult<any> | undefined = await singleQuery(res,
         "select * from auth where auth.id = $1",
         [cookie.user]
-    ));
+    );
+    if (authQuery === undefined) { return; }
 
-    if (authQueryResult === undefined) {
-        res.status(500);
-        res.send({'msg': 'Connection to authorization database was unsuccessful'});
-        return;
-    }
-
-    let rows: any[] = authQueryResult.rows;
+    let rows: any[] = authQuery.rows;
     if (rows.length === 0 || rows[0].password !== cookie.password) {
         res.status(401);
         res.send({'msg': 'Session data could not be verified. Please try logging in again.'});
@@ -34,7 +29,7 @@ async function verifyCookieCredentials(req: Request, res: Response, next:Functio
     next();
 }
 
-async function verifyAdmin(req: Request, res: Response, next:Function ) {
+async function verifyIsAdmin(req: Request, res: Response, next:Function ) {
     const userType: number = req.userType || -1;
 
     if (userType !== 1) {
@@ -46,4 +41,30 @@ async function verifyAdmin(req: Request, res: Response, next:Function ) {
     next();
 }
 
-export {verifyCookieCredentials, verifyAdmin}
+async function verifyUserInDB(req: Request, res: Response, next:Function ) {
+    const userName: string = req.body.user;
+
+    console.log(`select * from auth where id = ${userName}`)
+    const userQuery = await singleQuery(res,
+        "select * from auth where id = $1",
+        [userName]
+    );
+    if (userQuery === undefined) { return; }
+
+    if (userQuery.rows.length === 0) {
+        res.status(404);
+        res.send({'msg': 'User cannot be found'})
+        return;
+    }
+
+    const role: number = userQuery.rows[0].role_id;
+    if (role === 1) {
+        res.status(409);
+        res.send({'msg': 'Username corresponds to admin'})
+        return;
+    }
+
+    next();
+}
+
+export {verifyCookieCredentials, verifyIsAdmin, verifyUserInDB}

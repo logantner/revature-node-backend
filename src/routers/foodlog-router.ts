@@ -1,5 +1,5 @@
 import { Router, Request, Response, request, response } from "express";
-import { pool, quickQuery } from "../dbSupport/dbConnection"
+import { singleQuery } from "../dbSupport/dbConnection"
 import "express-session"
 import { QueryResult } from "pg";
 import moment from 'moment';
@@ -11,24 +11,21 @@ const logRouter = Router();
 logRouter.get("/", async (req, res) => {
     let userName: string = req.session ? req.session.user : "";
 
-    const result: QueryResult<any> | undefined = await quickQuery(pool.query(
+    const result: QueryResult<any> | undefined = await singleQuery(res,
         `select fl.log_date, fl.food_id, f.name as food_name, fl.quantity, fl.unit  
         from food_log fl join food f on fl.food_id = f.id 
         where fl.user_id = $1
         order by fl.log_date desc`,
         [userName]
-    ));
+    );
 
-    if (result === undefined) {
-        res.status(500);
-        res.send({'msg': 'Food log database connection was unsuccessful'});
-        return;
+    if (result !== undefined) {
+        res.send(result.rows);
     }
-
-    res.send(result.rows);
+    
 });
 
-logRouter.post("/", async (req, res) => {
+logRouter.put("/", async (req, res) => {
     if (
         allFieldsIncluded(req, res) &&
         isValidDate(req, res) &&
@@ -37,16 +34,13 @@ logRouter.post("/", async (req, res) => {
         isValidUnit(req, res)
     ) {
         const user: string = req.session ? req.session.user : "";
-        const qresult = await quickQuery(pool.query(
+        const alterQuery = await singleQuery(res,
             `insert into food_log (user_id, log_date, food_id, quantity, unit) 
             values ($1, $2, $3, $4, $5)`,
             [user, req.body.date, req.body.food_id, req.body.quantity, req.body.unit]
-        ));
-
-        if (qresult === undefined) {
-            res.status(500);
-            res.send({'msg': 'Food database connection was unsuccessful'});
-        } else {
+        );
+        
+        if (alterQuery !== undefined) {
             res.status(201);
             res.send({'msg': 'New log has been archived'});
         }
@@ -63,7 +57,7 @@ function allFieldsIncluded(req: Request, res: Response): boolean {
         req.body.unit === undefined
     ) {
         res.status(401);
-        res.send({'msg': "You must include a date, id, quantity and unit for this request"});
+        res.send({'msg': "You must include a date, food_id, quantity and unit for this request"});
         return false;
     }
     return true;
@@ -82,17 +76,10 @@ function isValidDate(req: Request, res: Response): boolean {
 }
 
 async function isValidFoodID(req: Request, res: Response): Promise<boolean> {
-    const q = await quickQuery(pool.query(
-        "select id from food", []
-    ));
+    const foodQuery = await singleQuery(res, "select id from food", []);
+    if (foodQuery === undefined) { return false; }
 
-    if (q === undefined) {
-        res.status(500);
-        res.send({'msg': 'Food database connection was unsuccessful'});
-        return false;
-    }
-
-    const foodIDs: number[] = q.rows.map((val) => {return parseInt(val.id)});
+    const foodIDs: number[] = foodQuery.rows.map((val) => {return parseInt(val.id)});
     const foodID: number = parseInt(req.body.food_id);
 
     if (!foodIDs.includes(foodID)) {

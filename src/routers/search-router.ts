@@ -1,5 +1,5 @@
-import { Router, Request, Response, request } from "express";
-import { pool, quickQuery } from "../dbSupport/dbConnection"
+import { Router, Request, Response } from "express";
+import { singleQuery } from "../dbSupport/dbConnection"
 import {searchNames, dbCategories} from '../dbSupport/searchSupport'
 
 const searchRouter = Router();
@@ -10,14 +10,9 @@ searchRouter.get("/", async (req, res) => {
     let queryString: string = await buildQueryString(req, insertVals, resData);
 
     if (queryString !== ''){
-        const searchResult = await quickQuery(
-            pool.query(queryString, insertVals)
-        );
+        const searchResult = await singleQuery(res, queryString, insertVals);
+        if (searchResult === undefined) {return;}
 
-        if (searchResult === undefined) {
-            res.json({'msg': 'Database connection was unsuccessful'});
-            return;
-        } 
         resData['result'] = searchResult.rows;
     } else {
         res.status(400);
@@ -47,7 +42,7 @@ async function buildQueryString(req: any, insertVals: string[], resData: any): P
         if (parsedSortby === undefined) {
             resData['msg'] = 'Warning: Sort keyword not supported. Please consult documentation for supported sorting keywords.'
         } else {
-            queryString += ` order by ${parsedSortby}`;
+            queryString += ` order by ${parsedSortby} desc`;
         }
     }
 
