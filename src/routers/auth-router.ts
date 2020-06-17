@@ -54,9 +54,15 @@ authRouter.post("/register", async (req, res) => {
 // check login status //
 ////////////////////////
 authRouter.get("/status", (req, res) => {
-    console.log("current session data:");
-    console.log(req.session);
-    res.end();
+    // console.log("current session data:");
+    // console.log(req.session);
+    // res.end();
+
+    if (req.session !== undefined && req.session.user !== undefined) {
+        res.send({'user': req.session.user})
+    } else {
+        res.send({'msg': 'Warning: User info not found'})
+    }
 });
 
 /////////////////
