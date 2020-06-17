@@ -99,24 +99,29 @@ authRouter.post("/promote", [verifyCookieCredentials, verifyIsAdmin, verifyUserI
 
 
 async function canBeAuthenticated(req: Request, res:Response): Promise<boolean> {
+    // Check that username and password fields are included
     if (!(req.body.username && req.body.password)) {
         res.status(400);
         res.send({'msg': 'Must include username and password'});
         return false;
     }
-
+    // Submit query to get auth user row
     const q = await singleQuery(res, 
         "SELECT id, password from auth where id = $1",
         [req.body.username]
     );
 
+    // Exit if there was a syntax/connection issue
     if (q === undefined) {return false;}
 
+    // Check that username was found and password matched
     if (q.rows.length === 0 || q.rows[0].password !== req.body.password) {
         res.status(401);
         res.send({'msg': 'Username or password is incorrect'});
         return false;
     }
+
+    // All checks have passed--user can be authenticated
     return true;
 }
 
