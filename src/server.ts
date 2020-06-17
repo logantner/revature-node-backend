@@ -5,6 +5,9 @@ import searchRouter from "./routers/search-router";
 import logRouter from "./routers/foodlog-router";
 import {verifyCookieCredentials} from "./middleware/auth-middleware";
 
+import cors from "cors"
+
+
 declare global {
     namespace Express {
         interface Request {
@@ -16,7 +19,8 @@ declare global {
 const app: Application = express();
 const port = process.env.PORT || 8082;
 
-console.log(process.env);
+// console.log(process.env);
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded());
