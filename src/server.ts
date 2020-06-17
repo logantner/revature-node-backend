@@ -17,7 +17,7 @@ declare global {
 }
 
 const app: Application = express();
-const port = process.env.PORT || 8082;
+const port = process.env.PORT || 8084;
 
 // console.log(process.env);
 app.use(cors());
