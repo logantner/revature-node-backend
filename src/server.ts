@@ -8,6 +8,7 @@ import {verifyCookieCredentials} from "./middleware/auth-middleware";
 import cors from "cors"
 
 
+
 declare global {
     namespace Express {
         interface Request {
@@ -28,7 +29,10 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(session({ 
     secret: "mySecret",
-    cookie: { secure: true } 
+    cookie: { 
+        secure: false, 
+        httpOnly: false
+    } 
 }));
 
 app.use("/auth", authRouter);
