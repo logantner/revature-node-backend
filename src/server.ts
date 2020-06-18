@@ -24,7 +24,10 @@ app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded());
-app.use(session({ secret: "mySecret" }));
+app.use(session({ 
+    secret: "mySecret",
+    cookie: { secure: true } 
+}));
 
 app.use("/auth", authRouter);
 app.use("/search", searchRouter);
