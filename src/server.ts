@@ -4,6 +4,7 @@ import {authRouter} from "./routers/auth-router";
 import searchRouter from "./routers/search-router";
 import logRouter from "./routers/foodlog-router";
 import {verifyCookieCredentials} from "./middleware/auth-middleware";
+// import sessionStore from "sessionstore"
 
 import cors from "cors"
 
@@ -34,6 +35,29 @@ app.use(session({
         httpOnly: false
     } 
 }));
+
+// app.use(session({
+//     secret: 'secret',
+//     store: sessionStore,
+//     resave: false,
+//     saveUninitialized: false,
+//     proxy: undefined,
+//     cookie: {
+//       secure: true,
+//       maxAge: 36000000
+//     },
+//     rolling: true,
+//     unset: 'destroy'
+//   }));
+
+const corsOptions = {
+    origin: /.your.domain.com$/,    // reqexp will match all prefixes
+    methods: "GET,HEAD,POST,PATCH,DELETE,OPTIONS",
+    credentials: true,                // required to pass
+    allowedHeaders: "Content-Type, Authorization, X-Requested-With",
+  }
+// intercept pre-flight check for all routes
+app.options('*', cors(corsOptions))
 
 app.use("/auth", authRouter);
 app.use("/search", searchRouter);
