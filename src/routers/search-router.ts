@@ -1,8 +1,14 @@
 import { Router, Request, Response } from "express";
 import { singleQuery } from "../dbSupport/dbConnection"
-import {searchNames, dbCategories} from '../dbSupport/searchSupport'
+import { searchNames, dbCategories } from '../dbSupport/searchSupport'
 
 const searchRouter = Router();
+
+searchRouter.get("/units", async (req, res) => {
+    const searchResult = await singleQuery(res, "select * from food_unit", []);
+    if (searchResult === undefined) {return;}
+    res.send(searchResult.rows);
+});
 
 searchRouter.get("/", async (req, res) => {
     let insertVals: string[] = [];
