@@ -59,9 +59,12 @@ authRouter.get("/status", (req, res) => {
     // res.end();
 
     if (req.session !== undefined && req.session.user !== undefined) {
-        res.send({'user': req.session.user})
+        res.send({'username': req.session.user})
     } else {
-        res.send({'msg': 'Warning: User info not found'})
+        res.send({
+            'username': '',
+            'msg': 'Warning: User info not found'
+        })
     }
 });
 
