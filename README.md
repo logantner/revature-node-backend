@@ -76,6 +76,15 @@ the following elements:
 * vit_c_mg: Vitamin C, in milligrams
 * calcium_mg: Calcium, in milligrams
 
+### Getting Supported Food Units
+
+To retrieve an updated list of supported food units for all tables (both full 
+names and shorthands), perform a simple get request:
+
+* Method: GET
+* URI: /search/units
+* Required fields: None
+
 ### Searching the Nutritional Table:
 
 * Method: GET
