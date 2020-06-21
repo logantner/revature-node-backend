@@ -53,17 +53,31 @@ authRouter.post("/register", async (req, res) => {
 ////////////////////////
 // check login status //
 ////////////////////////
-authRouter.get("/status", (req, res) => {
-    // console.log("current session data:");
-    // console.log(req.session);
-    // res.end();
+authRouter.get("/status", async (req, res) => {
 
     if (req.session !== undefined && req.session.user !== undefined) {
-        res.send({'username': req.session.user})
+        const qres = await singleQuery(res,
+            "select * from auth where id = $1",
+            [req.session.user]
+        );
+
+        if (qres !== undefined && qres.rows.length > 0) {
+            res.send({
+                'username': req.session.user, 
+                'role': qres.rows[0].role_id
+            });
+        } 
+        else {
+            res.send({
+                'username': req.session.user,
+                'msg': 'Warning: Session username is invalid'
+            });
+        }
+        
     } else {
         res.send({
             'username': '',
-            'msg': 'Warning: User info not found'
+            'msg': 'Warning: Session data not found'
         })
     }
 });
