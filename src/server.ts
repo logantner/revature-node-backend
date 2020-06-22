@@ -28,7 +28,6 @@ app.use(express.urlencoded());
 app.use(session({ 
     secret: "mySecret",
     cookie: {
-        secure: true,
         sameSite: 'none'
     }
 }));
