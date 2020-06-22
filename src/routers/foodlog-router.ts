@@ -31,7 +31,7 @@ logRouter.get("/", async (req, res) => {
 ///////////////////////
 // Add new log entry //
 ///////////////////////
-logRouter.put("/", async (req, res) => {
+logRouter.post("/", async (req, res) => {
     if (
         allFieldsIncluded(req, res) &&
         isValidDate(req, res) &&
