@@ -32,26 +32,26 @@ logRouter.get("/", async (req, res) => {
 // Add new log entry //
 ///////////////////////
 logRouter.post("/", async (req, res) => {
-    if (
-        true
-        // allFieldsIncluded(req, res) &&
-        // isValidDate(req, res) &&
-        // (await isValidFoodID(req, res)) &&
-        // isValidQuantity(req, res) &&
-        // isValidUnit(req, res)
-    ) {
-        const user: string = req.session ? req.session.user : "";
-        const alterQuery = await singleQuery(res,
-            `insert into food_log (user_id, log_date, food_id, quantity, unit) 
-            values ($1, $2, $3, $4, $5)`,
-            [user, req.body.date, req.body.food_id, req.body.quantity, req.body.unit]
-        );
+    // if (
+    //     true
+    //     // allFieldsIncluded(req, res) &&
+    //     // isValidDate(req, res) &&
+    //     // (await isValidFoodID(req, res)) &&
+    //     // isValidQuantity(req, res) &&
+    //     // isValidUnit(req, res)
+    // ) {
+    //     const user: string = req.session ? req.session.user : "";
+    //     const alterQuery = await singleQuery(res,
+    //         `insert into food_log (user_id, log_date, food_id, quantity, unit) 
+    //         values ($1, $2, $3, $4, $5)`,
+    //         [user, req.body.date, req.body.food_id, req.body.quantity, req.body.unit]
+    //     );
         
-        if (alterQuery !== undefined) {
-            res.status(201);
-            res.send({'msg': 'New log has been archived'});
-        }
-    }
+    //     if (alterQuery !== undefined) {
+    //         res.status(201);
+    //         res.send({'msg': 'New log has been archived'});
+    //     }
+    // }
     res.send();
 });
 
