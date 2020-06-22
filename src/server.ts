@@ -50,7 +50,7 @@ app.use(function (req, res, next) {
 app.use("/auth", authRouter);
 app.use("/search", searchRouter);
 
-app.use(verifyCookieCredentials);
+// app.use(verifyCookieCredentials);
 
 app.use("/log", logRouter);
 
