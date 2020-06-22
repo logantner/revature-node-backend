@@ -3,7 +3,7 @@ import session from "express-session";
 import {authRouter} from "./routers/auth-router";
 import searchRouter from "./routers/search-router";
 import logRouter from "./routers/foodlog-router";
-import {verifyCookieCredentials} from "./middleware/auth-middleware";
+// import {verifyCookieCredentials} from "./middleware/auth-middleware";
 
 // import cors from "cors";
 

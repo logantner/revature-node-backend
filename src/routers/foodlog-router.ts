@@ -4,6 +4,7 @@ import "express-session"
 import { QueryResult } from "pg";
 import moment from 'moment';
 import { dbUnits } from "../dbSupport/searchSupport";
+import {verifyCookieCredentials} from "../middleware/auth-middleware";
 
 
 const logRouter = Router();
@@ -11,7 +12,7 @@ const logRouter = Router();
 ///////////////////////////
 // Get all user log data //
 ///////////////////////////
-logRouter.get("/", async (req, res) => {
+logRouter.get("/", [verifyCookieCredentials], async (req:Request, res:Response) => {
     let userName: string = req.session ? req.session.user : "";
 
     const result: QueryResult<any> | undefined = await singleQuery(res,
@@ -31,7 +32,7 @@ logRouter.get("/", async (req, res) => {
 ///////////////////////
 // Add new log entry //
 ///////////////////////
-logRouter.post("/", async (req, res) => {
+logRouter.post("/", [verifyCookieCredentials], async (req:Request, res:Response) => {
     // if (
     //     true
     //     // allFieldsIncluded(req, res) &&
