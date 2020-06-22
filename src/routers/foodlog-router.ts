@@ -33,11 +33,12 @@ logRouter.get("/", async (req, res) => {
 ///////////////////////
 logRouter.post("/", async (req, res) => {
     if (
-        allFieldsIncluded(req, res) &&
-        isValidDate(req, res) &&
-        (await isValidFoodID(req, res)) &&
-        isValidQuantity(req, res) &&
-        isValidUnit(req, res)
+        true
+        // allFieldsIncluded(req, res) &&
+        // isValidDate(req, res) &&
+        // (await isValidFoodID(req, res)) &&
+        // isValidQuantity(req, res) &&
+        // isValidUnit(req, res)
     ) {
         const user: string = req.session ? req.session.user : "";
         const alterQuery = await singleQuery(res,
