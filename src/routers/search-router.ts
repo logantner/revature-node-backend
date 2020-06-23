@@ -10,6 +10,21 @@ searchRouter.get("/units", async (req, res) => {
     res.send(searchResult.rows);
 });
 
+searchRouter.get("/conversions", async (req, res) => {
+    const searchResult = await singleQuery(res, "select * from food_unit", []);
+    if (searchResult === undefined) {return;}
+
+    const conversions: any[] = [];
+    for (let row of searchResult.rows) {
+        conversions.push({
+            unit: row.symbol,
+            cupsEquivalency: row.equivalent_cups
+        });
+    }
+
+    res.send(conversions);
+});
+
 searchRouter.get("/", async (req, res) => {
     let insertVals: string[] = [];
     const resData: any = {};
