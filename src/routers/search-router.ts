@@ -10,6 +10,12 @@ searchRouter.get("/units", async (req, res) => {
     res.send(searchResult.rows);
 });
 
+searchRouter.get("/categories", async (req, res) => {
+    const searchResult = await singleQuery(res, "select * from food_category", []);
+    if (searchResult === undefined) {return;}
+    res.send(searchResult.rows.map(key => key.name));
+});
+
 searchRouter.get("/conversions", async (req, res) => {
     const searchResult = await singleQuery(res, "select * from food_unit", []);
     if (searchResult === undefined) {return;}
